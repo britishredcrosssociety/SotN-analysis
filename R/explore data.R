@@ -128,7 +128,7 @@ experiences %>%
   
   ggplot(aes(x = reorder(Answer, Percentage, sum), y = Percentage)) +
   geom_line(aes(group = paired), lty = 2) +
-  geom_point(aes(colour = Ethnicity)) +
+  geom_point(aes(colour = Ethnicity), size = 2.5) +
   
   coord_flip() +
   
