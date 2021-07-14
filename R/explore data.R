@@ -296,3 +296,66 @@ lonely_long %>%
   )
 
 ggsave("output/loneliness by all categories.png", height = 200, width = 230, units = "mm")
+
+
+# ---- Awaiting mental health support ----
+mh_awaiting <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q15")
+
+mh_awaiting <- 
+  mh_awaiting %>% 
+  clean_after_loading() %>% 
+  slice(-1)
+
+mh_awaiting_long <- 
+  mh_awaiting %>% 
+  wrangle_categories() %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No", "Yes"))
+  ))
+
+# - Plot -
+mh_awaiting_long %>% 
+  mutate(
+    bar_label = if_else(
+      Answer == "Yes", 
+      paste0(round(Percentage, 3) * 100, "%"),
+      ""
+    )
+  ) %>% 
+  
+  ggplot(aes(x = Subcategory, y = Percentage, fill = Answer)) +
+  geom_col(aes()) +
+  geom_text(aes(label = bar_label), size = 3, position = position_stack(vjust = 0.5)) +
+  
+  facet_wrap(~Category, ncol = 2, scales = "free") +  # strip.position = "left", 
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c(
+      "#fdae61",  # Yes
+      "#abd9e9",  # No
+      "#bdbdbd"   # Prefer not to say
+    )
+  ) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    title = "People who are younger, male, Black/African/Caribbean, unemployed, urban, or disabled are more likely to be \nwaiting for support with their mental health",
+    subtitle = "Survey question: Are you currently waiting for support with your mental health?",
+    caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+ggsave("output/waiting for mental health support by all categories.png", height = 200, width = 230, units = "mm")
+
