@@ -162,6 +162,69 @@ ggsave(
   units = "mm"
 )
 
+# ---- Support received ----
+# Q: In the last three months, have you received help getting non-cash items such as food, clothing, toiletries, prepaid cards for utilities such as energy, or other items from the following? Tick all that apply.
+support <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q5")
+
+support <- 
+  support %>% 
+  clean_after_loading() %>% 
+  slice(-1)
+
+support_pc_minorities <- 
+  support %>% 
+  filter(str_detect(Answer, "None")) %>% 
+  pull(`NET: All ethnic Minorities`)
+
+support_pc_white <- 
+  support %>% 
+  filter(str_detect(Answer, "None")) %>% 
+  pull(`NET: White background`)
+
+support %>% 
+  select(
+    Answer, 
+    `All ethnic Minorities` = `NET: All ethnic Minorities`, 
+    `White` = `NET: White background`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Ethnicity", values_to = "Percentage") %>% 
+  
+  # Link pairs of answers for plotting lines between the dots; source: https://datavizpyr.com/connect-paired-points-with-lines-in-scatterplot-in-ggplot2/
+  mutate(paired = rep(1:(n()/2),each = 2)) %>% 
+  
+  ggplot(aes(x = reorder(Answer, Percentage, sum), y = Percentage)) +
+  geom_line(aes(group = paired), lty = 2) +
+  geom_point(aes(colour = Ethnicity), size = 2.5) +
+  
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  scale_colour_manual(values = c("#7b3294", "#008837")) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents reporting receiving support",
+    colour = "",
+    title = glue::glue("{round(1 - support_pc_minorities, 3) * 100}% of people from minoritised ethnic groups received help with non-cash items compared to only {round(1 - support_pc_white, 3) * 100}% of white people"),
+    subtitle = "Survey question: In the last three months, have you received help getting non-cash items such as food, clothing, toiletries, \nprepaid cards for utilities such as energy, or other items from the following? (Tick all that apply)",
+    caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+ggsave(
+  "output/support by dichotomised ethnicity.png", 
+  width = 270, 
+  height = 150, 
+  units = "mm"
+)
+
 # ---- Mental health questions with Likert scales ----
 lonely <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
 
@@ -358,4 +421,3 @@ mh_awaiting_long %>%
   )
 
 ggsave("output/waiting for mental health support by all categories.png", height = 200, width = 230, units = "mm")
-
