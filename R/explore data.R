@@ -167,10 +167,54 @@ lonely_long <-
   
   mutate(Answer = str_remove(Answer, "NET: ")) %>% 
   
-  mutate(Answer = ordered(
+  mutate(Answer = factor(
     Answer,
-    levels = c("Prefer not to say", "Never", "Sometimes/hardly ever", "Always/a lot")
+    levels = rev(c("Prefer not to say", "Never", "Sometimes/hardly ever", "Always/a lot"))
   )) %>% 
   
   relocate(Category, Subcategory, Answer, Percentage)
+
+# - Plot loneliness by each category -
+lonely_long %>% 
+  mutate(
+    bar_label = if_else(
+      Answer == "Always/a lot", 
+      paste0(round(Percentage, 3) * 100, "%"),
+      ""
+    )
+  ) %>% 
   
+  ggplot(aes(x = Subcategory, y = Percentage, fill = Answer)) +
+  geom_col(aes()) +
+  geom_text(aes(label = bar_label), size = 3, position = position_stack(vjust = 0.5)) +
+
+  facet_wrap(~Category, ncol = 2, scales = "free") +  # strip.position = "left", 
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c(
+      "#c51b8a",  # Always/a lot
+      "#fa9fb5",  # Sometimes
+      "#fde0dd",  # Never
+      "#bdbdbd"   # Prefer not to say
+    )
+  ) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    title = "Loneliness highest among people who are younger, Black/African/Caribbean, unemployed, urban, or disabled",
+    subtitle = "Survey question: How often, if at all, do you feel lonely?",
+    caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+ggsave("output/loneliness by all categories.png", height = 200, width = 230, units = "mm")
