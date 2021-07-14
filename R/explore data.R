@@ -4,22 +4,16 @@ library(readxl)
 
 # Polling data is stored in our Teams site under Strategic Insight and Foresight > Data > Polls
 
-# ---- Loneliness ----
-lonely <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
+# ---- Make a lookup of cross-breaks to their sub-categories ----
+categories <- read_excel("data/BRC Dummy Tables.xlsx", skip = 0, sheet = "OP17272_BRC_Q16", n_max = 2)
 
-lonely <- 
-  lonely %>% 
-  rename(Answer = `...1`) %>% 
-  filter(!is.na(Answer)) %>%   # keep only percentages
-  filter(Answer != "Return to index")
-
-# Plot loneliness
-lonely %>% 
-  slice(2:7) %>% 
-  
-  ggplot(aes(x = Answer, y = Total)) +
-  geom_col()
-
+categories <- 
+  categories %>% 
+  t() %>% 
+  as_tibble() %>%
+  rename(Category = V1, Subcategory = V2) %>% 
+  slice(-c(1:2)) %>%  # Don't need first two rows
+  tidyr::fill(Category, .direction = "down")
 
 # ---- Experiences of vulnerability/risks/shocks ----
 # Q: In the last three months, have you experienced any of the following? Please tick all that apply.
@@ -79,3 +73,12 @@ ggsave(
   height = 150, 
   units = "mm"
 )
+
+# ---- Mental health questions with Likert scales ----
+lonely <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
+
+lonely <- 
+  lonely %>% 
+  rename(Answer = `...1`) %>% 
+  filter(!is.na(Answer)) %>%   # keep only percentages
+  filter(Answer != "Return to index")
