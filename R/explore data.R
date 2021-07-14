@@ -23,15 +23,95 @@ categories <-
     TRUE ~ Subcategory
   ))
 
+# ---- Common data wrangling functions ----
+clean_after_loading <- function(d) {
+  d %>% 
+    rename(Answer = `...1`) %>% 
+    filter(!is.na(Answer)) %>%   # keep only percentages
+    filter(Answer != "Return to index")
+}
+
+wrangle_categories <- function(d) {
+  d %>% 
+    select(
+      Answer, 
+      
+      # Gender
+      Male, Female,
+      
+      # Age
+      `18-34`, `35-54`, `55+`, 
+      
+      # Ethnicity
+      `NET: White background`, 
+      `NET: Mixed / multiple ethnic background`, 
+      `NET: Asian Background`, 
+      `NET: Black/African/Caribbean background`, 
+      `NET: Other`, 
+      `Don’t think of myself as any of these`,
+      `Prefer not to say`,
+      
+      # Urban/rural
+      `Urban area - cities or towns`,
+      `Suburban area – residential areas on the outskirts of cities and towns`,
+      `Rural area - villages or hamlets`,
+      
+      # Social grade
+      ABC1, C2DE,
+      
+      # Working status
+      `Working full time`,
+      `Working part time`, 
+      Retired, 
+      Unemployed, 
+      Other = Other...60,
+      
+      # Disability
+      `Has a disability`, 
+      `Does not have a disability`
+    ) %>% 
+    
+    pivot_longer(cols = -Answer, names_to = "Subcategory", values_to = "Percentage") %>% 
+    
+    left_join(
+      categories,
+      by = "Subcategory"
+    ) %>% 
+    
+    # Rename some of the subcategories
+    mutate(Subcategory = case_when(
+      # Ethnicity
+      Subcategory == "NET: White background" ~ "White",
+      Subcategory == "NET: Mixed / multiple ethnic background" ~ "Mixed/multiple",
+      Subcategory == "NET: Asian Background" ~ "Asian",
+      Subcategory == "NET: Black/African/Caribbean background" ~ "Black/African/Caribbean",
+      Subcategory == "NET: Other" ~ "Other ethnicity",
+      Subcategory == "Don’t think of myself as any of these" ~ "Doesn't identify as any",
+      
+      # Urban/rural
+      Subcategory == "Urban area - cities or towns" ~ "Urban",
+      Subcategory == "Suburban area – residential areas on the outskirts of cities and towns" ~ "Suburban",
+      Subcategory ==  "Rural area - villages or hamlets" ~ "Rural",
+      
+      # Working status
+      Subcategory == "Other...60" ~ "Other",
+      
+      # Disability
+      Subcategory == "Does not have a disability" ~ "No disability",
+      
+      TRUE ~ Subcategory
+    )) %>% 
+    
+    relocate(Category, Subcategory, Answer, Percentage)
+}
+
 # ---- Experiences of vulnerability/risks/shocks ----
 # Q: In the last three months, have you experienced any of the following? Please tick all that apply.
 experiences <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q3")
 
 experiences <- 
   experiences %>% 
-  rename(Answer = `...1`) %>% 
-  filter(!is.na(Answer)) %>%   # keep only percentages
-  filter(Answer != "Return to index") %>% 
+  clean_after_loading() %>% 
   slice(-1)
 
 experiences %>% 
@@ -87,9 +167,7 @@ lonely <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BR
 
 lonely <- 
   lonely %>% 
-  rename(Answer = `...1`) %>% 
-  filter(!is.na(Answer)) %>%   # keep only percentages
-  filter(Answer != "Return to index")
+  clean_after_loading()
 
 lonely_long <- 
   lonely %>% 
