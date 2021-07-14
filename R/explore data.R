@@ -33,25 +33,49 @@ experiences <-
   slice(-1)
 
 experiences %>% 
-  # mutate(bar_label = paste0(round(`NET: All ethnic Minorities`, 3) * 100, "%")) %>% 
+  select(
+    Answer, 
+    `All ethnic Minorities` = `NET: All ethnic Minorities`, 
+    `White` = `NET: White background`
+  ) %>% 
   
-  ggplot(aes(x = reorder(Answer, `NET: All ethnic Minorities`, sum), y = `NET: All ethnic Minorities`)) +
-  geom_col() +
-  # geom_text(aes(label = bar_label), hjust = -0.75) +
-  geom_point(aes(y = Total)) +
+  pivot_longer(cols = -Answer, names_to = "Ethnicity", values_to = "Percentage") %>% 
+  
+  # Link pairs of answers for plotting lines between the dots; source: https://datavizpyr.com/connect-paired-points-with-lines-in-scatterplot-in-ggplot2/
+  mutate(paired = rep(1:(n()/2),each = 2)) %>% 
+  
+  ggplot(aes(x = reorder(Answer, Percentage, sum), y = Percentage)) +
+  geom_line(aes(group = paired), lty = 2) +
+  geom_point(aes(colour = Ethnicity)) +
   
   coord_flip() +
   
   scale_y_continuous(labels = scales::percent) +
+  scale_colour_manual(values = c("#7b3294", "#008837")) +
   
   theme_classic() +
   labs(
     x = "",
-    y = "",
-    title = "In the last three months, have you experienced any of the following?",
-    subtitle = "Bars show responses from minoritised ethnic groups; dots show UK average",
+    y = "Percentage of respondents reporting each adverse event",
+    colour = "",
+    title = "More people from minoritised ethnic groups reported experiencing almost all adverse events compared to white people",
+    subtitle = paste(
+      "Althought slightly higher %s of white people reported problems with mental and physical health, and substance abuse",
+      "Survey question: In the last three months, have you experienced any of the following? (Tick all that apply)",
+      sep = "\n"
+    ) ,
     caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
   )
 
-
-
+ggsave(
+  "output/adverse events by dichotomised ethnicity.png", 
+  width = 270, 
+  height = 150, 
+  units = "mm"
+)
