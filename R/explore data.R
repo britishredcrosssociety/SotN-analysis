@@ -5,7 +5,7 @@ library(readxl)
 # Polling data is stored in our Teams site under Strategic Insight and Foresight > Data > Polls
 
 # ---- Make a lookup of cross-breaks to their sub-categories ----
-categories <- read_excel("data/BRC Dummy Tables.xlsx", skip = 0, sheet = "OP17272_BRC_Q16", n_max = 2)
+categories <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 0, sheet = "OP17272_BRC_Q16", n_max = 2)
 
 categories <- 
   categories %>% 
@@ -107,7 +107,7 @@ wrangle_categories <- function(d) {
 
 # ---- Experiences of vulnerability/risks/shocks ----
 # Q: In the last three months, have you experienced any of the following? Please tick all that apply.
-experiences <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q3")
+experiences <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q3")
 
 experiences <- 
   experiences %>% 
@@ -164,7 +164,7 @@ ggsave(
 
 # ---- Support received ----
 # Q: In the last three months, have you received help getting non-cash items such as food, clothing, toiletries, prepaid cards for utilities such as energy, or other items from the following? Tick all that apply.
-support <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q5")
+support <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q5")
 
 support <- 
   support %>% 
@@ -226,7 +226,7 @@ ggsave(
 )
 
 # ---- Mental health questions with Likert scales ----
-lonely <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
+lonely <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
 
 lonely <- 
   lonely %>% 
@@ -362,7 +362,7 @@ ggsave("output/loneliness by all categories.png", height = 200, width = 230, uni
 
 
 # ---- Awaiting mental health support ----
-mh_awaiting <- read_excel("data/BRC Dummy Tables.xlsx", skip = 2, sheet = "OP17272_BRC_Q15")
+mh_awaiting <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q15")
 
 mh_awaiting <- 
   mh_awaiting %>% 
