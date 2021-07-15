@@ -162,6 +162,12 @@ ggsave(
   units = "mm"
 )
 
+# Headline stats
+experiences %>% 
+  filter(str_detect(Answer, "^None")) %>% 
+  select(`NET: White background`, `NET: All ethnic Minorities`) %>% 
+  mutate(across(where(is.numeric), ~ round(.x, 2) * 100))
+
 # ---- Support received ----
 # Q: In the last three months, have you received help getting non-cash items such as food, clothing, toiletries, prepaid cards for utilities such as energy, or other items from the following? Tick all that apply.
 support <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q5")
@@ -421,3 +427,141 @@ mh_awaiting_long %>%
   )
 
 ggsave("output/waiting for mental health support by all categories.png", height = 200, width = 230, units = "mm")
+
+# ---- Mobility ----
+mobility <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q7")
+
+mobility <- 
+  mobility %>% 
+  clean_after_loading() %>% 
+  slice(-1)
+
+mobility_long <- 
+  mobility %>% 
+  
+  filter(
+    Answer %in% c("NET: Severe/extreme problems", "NET: Slight/moderate problems", "I have no problems in walking about", "Prefer not to say")
+  ) %>% 
+  
+  wrangle_categories() %>% 
+  
+  mutate(Answer = if_else(Answer == "I have no problems in walking about", "No problems", str_remove(Answer, "NET: "))) %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No problems", "Slight/moderate problems", "Severe/extreme problems"))
+  ))
+
+# - Plot -
+mobility_long %>% 
+  mutate(
+    bar_label = if_else(
+      Answer == "Yes", 
+      paste0(round(Percentage, 3) * 100, "%"),
+      ""
+    )
+  ) %>% 
+  
+  ggplot(aes(x = Subcategory, y = Percentage, fill = Answer)) +
+  geom_col(aes()) +
+  geom_text(aes(label = bar_label), size = 3, position = position_stack(vjust = 0.5)) +
+  
+  facet_wrap(~Category, ncol = 2, scales = "free") +  # strip.position = "left", 
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c(
+      "#c51b8a",  # Always/a lot
+      "#fa9fb5",  # Sometimes
+      "#fde0dd",  # Never
+      "#bdbdbd"   # Prefer not to say
+    )
+  ) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    # title = "",
+    subtitle = "Survey question: Please tick the response that best describes your health today regarding mobility.",
+    caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+# No need to save plot
+
+# ---- Usual activities ----
+activities <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q9")
+
+activities <- 
+  activities %>% 
+  clean_after_loading() %>% 
+  slice(-1)
+
+activities_long <- 
+  activities %>% 
+  
+  filter(
+    Answer %in% c("NET: Severe/extreme problems", "NET: Slight/moderate problems", "I have no problems doing my usual activities", "Prefer not to say")
+  ) %>% 
+  
+  wrangle_categories() %>% 
+  
+  mutate(Answer = if_else(Answer == "I have no problems doing my usual activities", "No problems", str_remove(Answer, "NET: "))) %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No problems", "Slight/moderate problems", "Severe/extreme problems"))
+  ))
+
+# - Plot -
+activities_long %>% 
+  mutate(
+    bar_label = if_else(
+      Answer == "Yes", 
+      paste0(round(Percentage, 3) * 100, "%"),
+      ""
+    )
+  ) %>% 
+  
+  ggplot(aes(x = Subcategory, y = Percentage, fill = Answer)) +
+  geom_col(aes()) +
+  geom_text(aes(label = bar_label), size = 3, position = position_stack(vjust = 0.5)) +
+  
+  facet_wrap(~Category, ncol = 2, scales = "free") +  # strip.position = "left", 
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c(
+      "#c51b8a",  # Always/a lot
+      "#fa9fb5",  # Sometimes
+      "#fde0dd",  # Never
+      "#bdbdbd"   # Prefer not to say
+    )
+  ) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    # title = "",
+    subtitle = "Survey question: Please tick the response that best describes your health today regarding mobility.",
+    caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+# No need to save plot
