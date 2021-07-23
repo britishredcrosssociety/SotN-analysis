@@ -81,70 +81,6 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
     )
 }
 
-# ---- Loneliness ----
-lonely <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
-
-lonely <- 
-  lonely %>% 
-  clean_after_loading()
-
-lonely_regional <- 
-  lonely %>% 
-  filter(
-    Answer %in% c("NET: Always/a lot", "NET: Sometimes/hardly ever", "Never", "Prefer not to say")
-  ) %>% 
-  select(
-    Answer, 
-    Scotland:`South West`
-  ) %>% 
-  
-  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
-  
-  mutate(Answer = str_remove(Answer, "NET: ")) %>% 
-  
-  mutate(Answer = factor(
-    Answer,
-    levels = rev(c("Prefer not to say", "Never", "Sometimes/hardly ever", "Always/a lot"))
-  )) %>% 
-  
-  relocate(Region, Answer, Percentage)
-
-plot_regional_answers(
-  lonely_regional,
-  answer_to_label = "Always/a lot", 
-  plot_title = "Loneliness", 
-  question = "How often, if at all, do you feel lonely?"
-)
-
-# ---- Awaiting mental health support ----
-mh_awaiting <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q15")
-
-mh_awaiting <- 
-  mh_awaiting %>% 
-  clean_after_loading() %>% 
-  slice(-1)
-
-mh_awaiting_regional <- 
-  mh_awaiting %>% 
-  select(
-    Answer, 
-    Scotland:`South West`
-  ) %>% 
-  
-  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
-  
-  mutate(Answer = factor(
-    Answer,
-    levels = rev(c("Prefer not to say", "No", "Yes"))
-  ))
-
-plot_regional_answers(
-  mh_awaiting_regional,
-  answer_to_label = "Yes", 
-  plot_title = "Awaiting MH support", 
-  question = "Are you currently waiting for support with your mental health?"
-)
-
 # ---- Day-to-day activities limited ----
 activities <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q6")
 
@@ -487,4 +423,68 @@ plot_regional_answers(
   answer_to_label = "Nearly every day", 
   plot_title = "Down/depressed", 
   question = "Over the last two weeks, how often have you been bothered by feeling down, depressed, or hopeless?"
+)
+
+# ---- Awaiting mental health support ----
+mh_awaiting <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q15")
+
+mh_awaiting <- 
+  mh_awaiting %>% 
+  clean_after_loading() %>% 
+  slice(-1)
+
+mh_awaiting_regional <- 
+  mh_awaiting %>% 
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No", "Yes"))
+  ))
+
+plot_regional_answers(
+  mh_awaiting_regional,
+  answer_to_label = "Yes", 
+  plot_title = "Awaiting MH support", 
+  question = "Are you currently waiting for support with your mental health?"
+)
+
+# ---- Loneliness ----
+lonely <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q16")
+
+lonely <- 
+  lonely %>% 
+  clean_after_loading()
+
+lonely_regional <- 
+  lonely %>% 
+  filter(
+    Answer %in% c("NET: Always/a lot", "NET: Sometimes/hardly ever", "Never", "Prefer not to say")
+  ) %>% 
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = str_remove(Answer, "NET: ")) %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "Never", "Sometimes/hardly ever", "Always/a lot"))
+  )) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  lonely_regional,
+  answer_to_label = "Always/a lot", 
+  plot_title = "Loneliness", 
+  question = "How often, if at all, do you feel lonely?"
 )
