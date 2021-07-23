@@ -34,6 +34,11 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
   } else if (length(unique(d$Answer)) == 11) {
     bar_palette <- viridis::magma(11)
     
+  } else {
+    bar_palette <- c(
+      viridis::magma(length(unique(d$Answer)) - 1),
+      "#bdbdbd"   # Prefer not to say
+    )
   }
   
   # print(length(unique(d$Answer)))
@@ -422,3 +427,64 @@ plot_regional_answers(
   question = "How anxious did you feel yesterday?"
 )
 
+# ---- No interest/pleasure ----
+interest <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q12")
+
+interest_regional <- 
+  interest %>% 
+  clean_after_loading() %>% 
+  filter(!Answer %in% c("Base: all respondents", "NET: Has been bothered")) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(
+    Answer = factor(
+      Answer,
+      levels = c("Nearly every day", "More than half the days", "Several days", "Not at all", "Prefer not to say")
+    )
+  ) %>% 
+
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  interest_regional,
+  answer_to_label = "Nearly every day", 
+  plot_title = "Bothered by no interest/pleasure", 
+  question = "Over the last two weeks, how often, if at all, have you been bothered by not having interest or pleasure in doing things?"
+)
+
+# ---- Down/depressed ----
+down <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q13")
+
+down_regional <- 
+  down %>% 
+  clean_after_loading() %>% 
+  filter(!Answer %in% c("Base: all respondents", "NET: Has been bothered")) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(
+    Answer = factor(
+      Answer,
+      levels = c("Nearly every day", "More than half the days", "Several days", "Not at all", "Prefer not to say")
+    )
+  ) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  down_regional,
+  answer_to_label = "Nearly every day", 
+  plot_title = "Down/depressed", 
+  question = "Over the last two weeks, how often have you been bothered by feeling down, depressed, or hopeless?"
+)
