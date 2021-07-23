@@ -17,7 +17,7 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
   
   # Choose colour scale based on the number of possible responses/answers
   if (length(unique(d$Answer)) == 4) {
-    bar_pallette <- c(
+    bar_palette <- c(
       "#c51b8a",  # Always/a lot
       "#fa9fb5",  # Sometimes
       "#fde0dd",  # Never
@@ -25,13 +25,18 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
     )
     
   } else if (length(unique(d$Answer)) == 3) {
-    bar_pallette <- c(
+    bar_palette <- c(
       "#fdae61",  # Yes
       "#abd9e9",  # No
       "#bdbdbd"   # Prefer not to say
     )
     
+  } else if (length(unique(d$Answer)) == 11) {
+    bar_palette <- viridis::magma(11)
+    
   }
+  
+  # print(length(unique(d$Answer)))
   
   d %>% 
     mutate(
@@ -52,7 +57,7 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
     geom_text(aes(label = bar_label), size = 3, position = position_stack(vjust = 0.5)) +
     coord_flip() +
     scale_y_continuous(labels = scales::percent) +
-    scale_fill_manual(values = bar_pallette) +
+    scale_fill_manual(values = bar_palette) +
     
     theme_classic() +
     labs(
@@ -304,3 +309,116 @@ plot_regional_answers(
   plot_title = "Pain/discomfort", 
   question = "Please tick the response that best describes your health today regarding pain/discomfort."
 )
+
+# ---- Life satisfaction ----
+satisfaction <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q11")
+
+satisfaction_regional <- 
+  satisfaction %>% 
+  clean_after_loading() %>% 
+  filter(!Answer %in% c("Base: all respondents", "Average")) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = str_remove(Answer, "\\[[0-9]+\\]\\s")) %>% 
+  mutate(Answer = factor(Answer)) %>% 
+  mutate(Answer = fct_relevel(Answer, "10 – Completely", after = Inf)) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  satisfaction_regional,
+  answer_to_label = "0 – Not at all", 
+  plot_title = "Life satisfaction", 
+  question = "How satisfied are you with your life nowadays?"
+)
+
+# ---- Worthwhile ----
+worthwhile <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q11 (2)")
+
+worthwhile_regional <- 
+  worthwhile %>% 
+  clean_after_loading() %>% 
+  filter(!Answer %in% c("Base: all respondents", "Average")) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = str_remove(Answer, "\\[[0-9]+\\]\\s")) %>% 
+  mutate(Answer = factor(Answer)) %>% 
+  mutate(Answer = fct_relevel(Answer, "10 – Completely", after = Inf)) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  worthwhile_regional,
+  answer_to_label = "0 – Not at all", 
+  plot_title = "Worthwhile", 
+  question = "To what extent do you feel the things you do in your life are worthwhile?"
+)
+
+# ---- Happiness ----
+happiness <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q11 (3)")
+
+happiness_regional <- 
+  happiness %>% 
+  clean_after_loading() %>% 
+  filter(!Answer %in% c("Base: all respondents", "Average")) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = str_remove(Answer, "\\[[0-9]+\\]\\s")) %>% 
+  mutate(Answer = factor(Answer)) %>% 
+  mutate(Answer = fct_relevel(Answer, "10 – Completely", after = Inf)) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  happiness_regional,
+  answer_to_label = "0 – Not at all", 
+  plot_title = "Happiness", 
+  question = "How happy did you feel yesterday?"
+)
+
+# ---- Anxious ----
+anxious <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q11 (4)")
+
+anxious_regional <- 
+  anxious %>% 
+  clean_after_loading() %>% 
+  filter(!Answer %in% c("Base: all respondents", "Average")) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = str_remove(Answer, "\\[[0-9]+\\]\\s")) %>% 
+  mutate(Answer = factor(Answer)) %>% 
+  mutate(Answer = fct_relevel(Answer, "10 – Completely", after = Inf)) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  anxious_regional,
+  answer_to_label = "0 – Not at all", 
+  plot_title = "Anxiety", 
+  question = "How anxious did you feel yesterday?"
+)
+
