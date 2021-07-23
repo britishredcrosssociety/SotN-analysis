@@ -226,11 +226,18 @@ activities_regional <-
     levels = rev(c("No", "Yes, limited a little", "Yes, limited a lot"))
   ))
 
-plot_regional_answers(
-  activities_regional,
-  answer_to_label = "Yes, limited a lot", 
-  plot_title = "Daily activities limited", 
-  question = "Are your day-to-day activities limited because of a health problem or disability which has lasted, or is expected to last, at least 12 months?"
+(plt_activities <- 
+  plot_regional_answers(
+    activities_regional,
+    answer_to_label = "Yes, limited a lot", 
+    plot_title = "Daily activities limited", 
+    question = "Are your day-to-day activities limited because of a health problem or disability which has lasted, or is expected to last, at least 12 months?"
+  ))
+
+ggsave(
+  plot = plt_activities,
+  filename = "output/regional/activities-limited.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Mobility ----
@@ -263,11 +270,18 @@ mobility_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  mobility_regional,
-  answer_to_label = "Severe/extreme problems", 
-  plot_title = "Mobility", 
-  question = "Please tick the response that best describes your health today regarding mobility."
+(plt_mobility <- 
+  plot_regional_answers(
+    mobility_regional,
+    answer_to_label = "Severe/extreme problems", 
+    plot_title = "Mobility", 
+    question = "Please tick the response that best describes your health today regarding mobility."
+  ))
+
+ggsave(
+  plot = plt_mobility,
+  filename = "output/regional/mobility.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Self-care ----
@@ -298,11 +312,18 @@ self_care_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  self_care_regional,
-  answer_to_label = "Severe/extreme problems", 
-  plot_title = "Self-care", 
-  question = "Please tick the response that best describes your health today regarding self-care."
+(plt_self_care <- 
+  plot_regional_answers(
+    self_care_regional,
+    answer_to_label = "Severe/extreme problems", 
+    plot_title = "Self-care", 
+    question = "Please tick the response that best describes your health today regarding self-care."
+  ))
+
+ggsave(
+  plot = plt_self_care,
+  filename = "output/regional/self-care.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Usual activities ----
@@ -333,11 +354,18 @@ usual_activities_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  usual_activities_regional,
-  answer_to_label = "Severe/extreme problems", 
-  plot_title = "Usual activities", 
-  question = "Please tick the response that best describes your health today regarding usual activities (e.g. work, study, housework, family or leisure activities)."
+(plt_usual_activities <- 
+  plot_regional_answers(
+    usual_activities_regional,
+    answer_to_label = "Severe/extreme problems", 
+    plot_title = "Usual activities", 
+    question = "Please tick the response that best describes your health today regarding usual activities (e.g. work, study, housework, family or leisure activities)."
+  ))
+
+ggsave(
+  plot = plt_usual_activities,
+  filename = "output/regional/usual-activities.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Pain/discomfort ----
@@ -368,11 +396,18 @@ pain_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  pain_regional,
-  answer_to_label = "Severe/extreme pain or discomfort", 
-  plot_title = "Pain/discomfort", 
-  question = "Please tick the response that best describes your health today regarding pain/discomfort."
+(plt_pain <- 
+  plot_regional_answers(
+    pain_regional,
+    answer_to_label = "Severe/extreme pain or discomfort", 
+    plot_title = "Pain/discomfort", 
+    question = "Please tick the response that best describes your health today regarding pain/discomfort."
+  ))
+
+ggsave(
+  plot = plt_pain,
+  filename = "output/regional/pain.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Life satisfaction ----
@@ -396,11 +431,18 @@ satisfaction_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  satisfaction_regional,
-  answer_to_label = "0 – Not at all", 
-  plot_title = "Life satisfaction", 
-  question = "How satisfied are you with your life nowadays?"
+(plt_satisfaction <- 
+  plot_regional_answers(
+    satisfaction_regional,
+    answer_to_label = "0 – Not at all", 
+    plot_title = "Life satisfaction", 
+    question = "How satisfied are you with your life nowadays?"
+  ))
+
+ggsave(
+  plot = plt_satisfaction,
+  filename = "output/regional/satisfaction.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Worthwhile ----
@@ -424,11 +466,18 @@ worthwhile_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  worthwhile_regional,
-  answer_to_label = "0 – Not at all", 
-  plot_title = "Worthwhile", 
-  question = "To what extent do you feel the things you do in your life are worthwhile?"
+(plt_worthwhile <- 
+  plot_regional_answers(
+    worthwhile_regional,
+    answer_to_label = "0 – Not at all", 
+    plot_title = "Worthwhile", 
+    question = "To what extent do you feel the things you do in your life are worthwhile?"
+  ))
+
+ggsave(
+  plot = plt_worthwhile,
+  filename = "output/regional/worthwhile.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Happiness ----
@@ -452,11 +501,18 @@ happiness_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  happiness_regional,
-  answer_to_label = "0 – Not at all", 
-  plot_title = "Happiness", 
-  question = "How happy did you feel yesterday?"
+(plt_happiness <- 
+  plot_regional_answers(
+    happiness_regional,
+    answer_to_label = "0 – Not at all", 
+    plot_title = "Happiness", 
+    question = "How happy did you feel yesterday?"
+  ))
+
+ggsave(
+  plot = plt_happiness,
+  filename = "output/regional/happiness.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Anxious ----
@@ -480,11 +536,18 @@ anxious_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  anxious_regional,
-  answer_to_label = "0 – Not at all", 
-  plot_title = "Anxiety", 
-  question = "How anxious did you feel yesterday?"
+(plt_anxious <- 
+  plot_regional_answers(
+    anxious_regional,
+    answer_to_label = "0 – Not at all", 
+    plot_title = "Anxiety", 
+    question = "How anxious did you feel yesterday?"
+  ))
+
+ggsave(
+  plot = plt_anxious,
+  filename = "output/regional/anxious.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- No interest/pleasure ----
@@ -511,11 +574,18 @@ interest_regional <-
 
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  interest_regional,
-  answer_to_label = "Nearly every day", 
-  plot_title = "Bothered by no interest/pleasure", 
-  question = "Over the last two weeks, how often, if at all, have you been bothered by not having interest or pleasure in doing things?"
+(plt_interest <- 
+  plot_regional_answers(
+    interest_regional,
+    answer_to_label = "Nearly every day", 
+    plot_title = "Bothered by no interest/pleasure", 
+    question = "Over the last two weeks, how often, if at all, have you been bothered by not having interest or pleasure in doing things?"
+  ))
+
+ggsave(
+  plot = plt_interest,
+  filename = "output/regional/interest.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Down/depressed ----
@@ -542,11 +612,18 @@ down_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  down_regional,
-  answer_to_label = "Nearly every day", 
-  plot_title = "Down/depressed", 
-  question = "Over the last two weeks, how often have you been bothered by feeling down, depressed, or hopeless?"
+(plt_down <- 
+  plot_regional_answers(
+    down_regional,
+    answer_to_label = "Nearly every day", 
+    plot_title = "Down/depressed", 
+    question = "Over the last two weeks, how often have you been bothered by feeling down, depressed, or hopeless?"
+  ))
+
+ggsave(
+  plot = plt_down,
+  filename = "output/regional/down.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Received mental health support ----
@@ -569,11 +646,18 @@ mh_received_regional <-
     levels = rev(c("Prefer not to say", "No", "Yes"))
   ))
 
-plot_regional_answers(
-  mh_received_regional,
-  answer_to_label = "Yes", 
-  plot_title = "Received MH support", 
-  question = "Have you received support for your mental health in the past three months?"
+(plt_mh_rec <- 
+  plot_regional_answers(
+    mh_received_regional,
+    answer_to_label = "Yes", 
+    plot_title = "Received MH support", 
+    question = "Have you received support for your mental health in the past three months?"
+  ))
+
+ggsave(
+  plot = plt_mh_rec,
+  filename = "output/regional/mental-health-support-received.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Awaiting mental health support ----
@@ -598,11 +682,18 @@ mh_awaiting_regional <-
     levels = rev(c("Prefer not to say", "No", "Yes"))
   ))
 
-plot_regional_answers(
-  mh_awaiting_regional,
-  answer_to_label = "Yes", 
-  plot_title = "Awaiting MH support", 
-  question = "Are you currently waiting for support with your mental health?"
+(plt_mh_wait <- 
+  plot_regional_answers(
+    mh_awaiting_regional,
+    answer_to_label = "Yes", 
+    plot_title = "Awaiting MH support", 
+    question = "Are you currently waiting for support with your mental health?"
+  ))
+
+ggsave(
+  plot = plt_mh_wait,
+  filename = "output/regional/mental-health-support-waiting.png",
+  height = 150, width = 150, units = "mm"
 )
 
 # ---- Loneliness ----
@@ -633,9 +724,16 @@ lonely_regional <-
   
   relocate(Region, Answer, Percentage)
 
-plot_regional_answers(
-  lonely_regional,
-  answer_to_label = "Always/a lot", 
-  plot_title = "Loneliness", 
-  question = "How often, if at all, do you feel lonely?"
+(plt_lonely <- 
+  plot_regional_answers(
+    lonely_regional,
+    answer_to_label = "Always/a lot", 
+    plot_title = "Loneliness", 
+    question = "How often, if at all, do you feel lonely?"
+  ))
+
+ggsave(
+  plot = plt_lonely,
+  filename = "output/regional/loneliness.png",
+  height = 150, width = 150, units = "mm"
 )
