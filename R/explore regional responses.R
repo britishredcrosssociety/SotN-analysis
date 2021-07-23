@@ -425,6 +425,33 @@ plot_regional_answers(
   question = "Over the last two weeks, how often have you been bothered by feeling down, depressed, or hopeless?"
 )
 
+# ---- Received mental health support ----
+mh_received <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q14")
+
+mh_received_regional <- 
+  mh_received %>% 
+  clean_after_loading() %>% 
+  slice(-1) %>% 
+
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No", "Yes"))
+  ))
+
+plot_regional_answers(
+  mh_received_regional,
+  answer_to_label = "Yes", 
+  plot_title = "Received MH support", 
+  question = "Have you received support for your mental health in the past three months?"
+)
+
 # ---- Awaiting mental health support ----
 mh_awaiting <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q15")
 
