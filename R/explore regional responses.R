@@ -234,3 +234,73 @@ plot_regional_answers(
   plot_title = "Self-care", 
   question = "Please tick the response that best describes your health today regarding self-care."
 )
+
+# ---- Usual activities ----
+usual_activities <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q9")
+
+usual_activities_regional <- 
+  usual_activities %>% 
+  clean_after_loading() %>% 
+  slice(-1) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  filter(
+    Answer %in% c("NET: Slight/moderate problems", "NET: Severe/extreme problems", "I have no problems doing my usual activities", "Prefer not to say")
+  ) %>% 
+  
+  mutate(Answer = if_else(Answer == "I have no problems doing my usual activities", "No problems", str_remove(Answer, "NET: "))) %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No problems", "Slight/moderate problems", "Severe/extreme problems"))
+  )) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  usual_activities_regional,
+  answer_to_label = "Severe/extreme problems", 
+  plot_title = "Usual activities", 
+  question = "Please tick the response that best describes your health today regarding usual activities (e.g. work, study, housework, family or leisure activities)."
+)
+
+# ---- Pain/discomfort ----
+pain <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q10")
+
+pain_regional <- 
+  pain %>% 
+  clean_after_loading() %>% 
+  slice(-1) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage") %>% 
+  
+  filter(
+    Answer %in% c("NET: Slight/moderate pain or discomfort", "NET: Severe/extreme pain or discomfort", "I have no pain or discomfort", "Prefer not to say")
+  ) %>% 
+  
+  mutate(Answer = if_else(Answer == "I have no pain or discomfort", "No pain/discomfort", str_remove(Answer, "NET: "))) %>% 
+  
+  mutate(Answer = factor(
+    Answer,
+    levels = rev(c("Prefer not to say", "No pain/discomfort", "Slight/moderate pain or discomfort", "Severe/extreme pain or discomfort"))
+  )) %>% 
+  
+  relocate(Region, Answer, Percentage)
+
+plot_regional_answers(
+  pain_regional,
+  answer_to_label = "Severe/extreme pain or discomfort", 
+  plot_title = "Pain/discomfort", 
+  question = "Please tick the response that best describes your health today regarding pain/discomfort."
+)
