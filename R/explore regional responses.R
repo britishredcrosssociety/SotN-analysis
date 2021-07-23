@@ -1,5 +1,6 @@
 library(tidyverse)
 library(readxl)
+library(plotly)
 
 # ---- Common functions ----
 clean_after_loading <- function(d) {
@@ -80,6 +81,129 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
       legend.position = "top"
     )
 }
+
+# ---- Adverse experiences ----
+adverse <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q3")
+
+adverse_regional <- 
+  adverse %>% 
+  clean_after_loading() %>% 
+  slice(-1) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage")
+
+plt_adverse <- 
+  adverse_regional %>% 
+  ggplot(aes(x = Answer, y = Percentage, fill = Region)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    title = "Adverse events",
+    subtitle = "Survey question: In the last three months, have you experienced any of the following?"
+    # caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+ggplotly(plt_adverse)
+
+# ---- Received money ----
+money <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q4")
+
+money_regional <- 
+  money %>% 
+  clean_after_loading() %>% 
+  slice(-1) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage")
+
+plt_money <- 
+  money_regional %>% 
+  ggplot(aes(x = Answer, y = Percentage, fill = Region)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    title = "Received money",
+    subtitle = "Survey question: In the last three months, have you received money from any of the following?"
+    # caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+ggplotly(plt_money)
+
+# ---- Received non-cash items ----
+support <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q5")
+
+support_regional <- 
+  support %>% 
+  clean_after_loading() %>% 
+  slice(-1) %>% 
+  
+  select(
+    Answer, 
+    Scotland:`South West`
+  ) %>% 
+  
+  pivot_longer(cols = -Answer, names_to = "Region", values_to = "Percentage")
+
+plt_support <- 
+  support_regional %>% 
+  ggplot(aes(x = Answer, y = Percentage, fill = Region)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent) +
+  
+  theme_classic() +
+  labs(
+    x = "",
+    y = "Percentage of respondents",
+    fill = "",
+    title = "Received money",
+    subtitle = "Survey question: In the last three months, have you received money from any of the following?"
+    # caption = "Source: Opinium survey"
+  ) +
+  theme(
+    # plot.caption = element_text(hjust = 0), #Default is hjust=1
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    legend.position = "top"
+  )
+
+ggplotly(plt_support)
 
 # ---- Day-to-day activities limited ----
 activities <- read_excel("data/OP17272 BRC Understanding Vulnerabilities.xlsx", skip = 2, sheet = "OP17272_BRC_Q6")
