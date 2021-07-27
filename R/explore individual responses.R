@@ -1,6 +1,7 @@
 library(tidyverse)
 library(janitor)
 library(readxl)
+library(lme4)
 
 eth_cats <- read_csv("data/ethnic-categories-lookup.csv")
 
@@ -110,6 +111,112 @@ all_support_other %>%
   tabyl(n_supporters_grouped)
 
 plot(table(all_support_other$n_supporters))
+
+# ---- Loneliness ----
+loneliness <- 
+  all %>% 
+  select(
+    # Demographics
+    Age = D2_Age.c,
+    Gender = D1_Gender.c,
+    Ethnicity = OP17272_BRC_Q2.a,
+    Region = D4_Region.c,
+    Employment = D3_employment.a,
+    Grade = D5_socialgrade.a,
+    RUC = OP17272_BRC_Q1.a,
+    
+    # Questions of interest
+    Loneliness = OP17272_BRC_Q16.a
+  ) %>% 
+  
+  mutate(
+    Age = as.integer(ifelse(Age == "Over 80", "80", Age))
+  ) %>% 
+  
+  mutate(
+    Age_group = cut(Age, c(18, 30, 40, 50, 60, 70, 80, 90), right = FALSE)
+  ) %>% 
+  
+  left_join(eth_cats, by = c("Ethnicity" = "Opinium category")) %>% 
+  rename(Ethnicity_grouped = `Broad ONS category`) %>% 
+  mutate(Ethnicity_grouped = factor(Ethnicity_grouped)) %>% 
+  mutate(Ethnicity_grouped = fct_relevel(Ethnicity_grouped, "White")) %>% 
+  
+  mutate(
+    Loneliness_bin = if_else(
+      Loneliness %in% c("Always", "A lot of the time"),
+      1,
+      0
+    )
+  )
+
+# Regional profile of people reporting a lot of loneliness
+# summary(glm(Loneliness_bin ~ Age + Gender + Ethnicity + Employment + Grade + RUC + Region, data = loneliness))
+
+loneliness_summary <- 
+  loneliness %>% 
+  filter(Loneliness_bin == 1) %>% 
+  count(Age_group, Ethnicity_grouped, Region)
+
+loneliness_totals <- 
+  loneliness_summary %>% 
+  group_by(Region) %>% 
+  summarise(n_total = sum(n)) %>% 
+  ungroup()
+
+loneliness_summary %>% 
+  left_join(loneliness_totals, by = "Region") %>% 
+  mutate(prop = n / n_total) %>% 
+  
+  ggplot(aes(x = Age_group, y = prop, fill = Ethnicity_grouped)) +
+  geom_col() +
+  facet_wrap(~Region) +
+  scale_y_continuous(labels = scales::percent)
+
+loneliness %>% 
+  filter(Region == "Wales") %>% 
+  distinct(Ethnicity_grouped)
+
+m_loneliness <- 
+   glmer(
+    Loneliness_bin ~ Age + Gender + Ethnicity_grouped + (1 | Region), 
+    family = "binomial",
+    data = loneliness
+  )
+
+summary(m_loneliness)
+
+new_data <- expand_grid(
+  Age = 18:80,
+  Gender = unique(loneliness$Gender),
+  Ethnicity_grouped = unique(loneliness$Ethnicity_grouped),
+  Region = unique(loneliness$Region)
+)
+
+pred_loneliness <- predict(m_loneliness, new_data, type = "response", se.fit = TRUE)
+
+new_data$fit <- pred_loneliness$fit
+new_data$se.fit <- pred_loneliness$se.fit
+
+# Calculate CIs
+new_data$ci.high <- new_data$fit + 1.96 * new_data$se.fit
+new_data$ci.low  <- new_data$fit - 1.96 * new_data$se.fit
+
+# Plot loneliness by age group, sex and ethnicity
+new_data %>% 
+  ggplot(aes(x = Age, y = fit, shape = Gender, lty = Gender, colour = Ethnicity_grouped)) +
+  geom_pointrange(aes(ymin = ci.low, ymax = ci.high), position = position_dodge(width = 1)) +
+  facet_wrap(~Region) +
+  
+  scale_colour_brewer(palette = "Set2") +
+  
+  labs(x = NULL, y = "Probability of reporting loneliness", colour = NULL, shape = NULL, lty = NULL,
+       caption = "Source: BRC/I&I analysis of Understanding Society") +
+  theme_classic() +
+  theme(legend.position = "bottom", 
+        # axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.x = element_blank())
+
 
 # ---- Multivariate analysis ----
 all_summary <- 
