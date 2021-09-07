@@ -44,7 +44,7 @@ health_words |>
   filter(n > 2) |> 
   mutate(word = reorder(word, n)) |> 
   ggplot(aes(n, word)) +
-  geom_col() +
+  geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
   labs(
     x = "Number of times mentioned",
     y = NULL
@@ -68,7 +68,7 @@ health_bigrams |>
   filter(n > 1) |>
   mutate(bigram = reorder(bigram, n)) |>
   ggplot(aes(n, bigram)) +
-  geom_col() +
+  geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
   labs(
     x = "Number of times mentioned",
     y = NULL
@@ -76,3 +76,5 @@ health_bigrams |>
   theme_classic()
 
 ggsave("output/news-bigrams.png", width = 100, height = 100, units = "mm")
+
+# ---- 
