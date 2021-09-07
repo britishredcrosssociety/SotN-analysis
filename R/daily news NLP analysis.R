@@ -13,11 +13,26 @@ news <- read_lines("data/daily-news-2021-08.txt") |>
 news_health <- 
   news |> 
   filter(str_detect(text, "^Health")) |> 
-  mutate(text = str_remove(text, "Health inequalities: "))
+  mutate(text = str_remove(text, "Health inequalities: ")) |> 
+  mutate(text = str_to_lower(text))
 
-# Convert text to lower case
-news_health <-
-  news_health |> 
+news_disasters <- 
+  news |> 
+  filter(str_detect(text, "^Disasters")) |> 
+  mutate(text = str_remove(text, "Disasters and emergencies: ")) |> 
+  mutate(text = str_to_lower(text))
+
+news_displacement <- 
+  news |> 
+  filter(str_detect(text, "^Displacement")) |> 
+  mutate(text = str_remove(text, "Displacement and migration: ")) |> 
+  mutate(text = str_to_lower(text))
+
+news_climate <- 
+  news |> 
+  filter(str_detect(text, "^Climate")) |> 
+  mutate(text = str_remove(text, "Climate: ")) |> 
+  mutate(text = str_remove(text, "Climate change: ")) |> 
   mutate(text = str_to_lower(text))
 
 # ---- Unigrams ----
