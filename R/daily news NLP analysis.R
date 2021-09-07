@@ -104,8 +104,9 @@ custom_stop_words <-
 #' @param news A tibble/dataframe containing the text to parse
 #' @param custom_stop_words A tibble/dataframe containing custom stop words
 #' @param n_to_display Plot words appearing at least this number of times
+#' @param cause_name Name of the cause, for the plot title
 #' @return ggplot of unigrams
-plot_unigram <- function(news, custom_stop_words, n_to_display) {
+plot_unigram <- function(news, custom_stop_words, n_to_display, cause_name) {
   # Tokenize text column to unigrams
   news_words <-
     news |> 
@@ -123,7 +124,8 @@ plot_unigram <- function(news, custom_stop_words, n_to_display) {
     geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
     labs(
       x = "Number of times mentioned",
-      y = NULL
+      y = NULL,
+      title = glue::glue("Most frequently mentioned words in {cause_name}")
     ) +
     theme_classic()
   
@@ -131,24 +133,25 @@ plot_unigram <- function(news, custom_stop_words, n_to_display) {
 }
 
 # - Health inequalities -
-plot_unigram(news_health, custom_stop_words, 5)
-ggsave("output/news-health-word-counts.png", width = 100, height = 100, units = "mm")
+plot_unigram(news_health, custom_stop_words, 5, "Health Inequalities")
+ggsave("output/news-health-word-counts.png", width = 200, height = 100, units = "mm")
 
 # - Disasters and emergencies -
-plot_unigram(news_disasters, custom_stop_words, 5)
-ggsave("output/news-disasters-word-counts.png", width = 100, height = 100, units = "mm")
+plot_unigram(news_disasters, custom_stop_words, 5, "Disasters & Emergencies")
+ggsave("output/news-disasters-word-counts.png", width = 200, height = 100, units = "mm")
 
 # - Displacement and migration -
-plot_unigram(news_displacement, custom_stop_words, 5)
-ggsave("output/news-displacement-word-counts.png", width = 100, height = 100, units = "mm")
+plot_unigram(news_displacement, custom_stop_words, 5, "Displacement & Migration")
+ggsave("output/news-displacement-word-counts.png", width = 200, height = 100, units = "mm")
 
 # ---- Bigrams ----
 #' Plot bigrams
 #' @param news A tibble/dataframe containing the text to parse
 #' @param custom_stop_words A tibble/dataframe containing custom stop words
 #' @param n_to_display Plot words appearing at least this number of times
+#' @param cause_name Name of the cause, for the plot title
 #' @return ggplot of bigrams
-plot_bigram <- function(news, custom_stop_words, n_to_display) {
+plot_bigram <- function(news, custom_stop_words, n_to_display, cause_name) {
   bigrams <- 
     news |> 
     unnest_tokens(bigram, text, token = "ngrams", n = 2) |> 
@@ -167,7 +170,8 @@ plot_bigram <- function(news, custom_stop_words, n_to_display) {
     geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
     labs(
       x = "Number of times mentioned",
-      y = NULL
+      y = NULL,
+      title = glue::glue("Most frequently mentioned word pairs in {cause_name}")
     ) +
     theme_classic()
   
@@ -175,16 +179,16 @@ plot_bigram <- function(news, custom_stop_words, n_to_display) {
 }
 
 # - Health inequalities -
-plot_bigram(news_health, custom_stop_words, 2)
-ggsave("output/news-health-bigrams.png", width = 100, height = 100, units = "mm")
+plot_bigram(news_health, custom_stop_words, 2, "Health Inequalities")
+ggsave("output/news-health-bigrams.png", width = 200, height = 100, units = "mm")
 
 # - Disasters and emergencies -
-plot_bigram(news_disasters, custom_stop_words, 2)
-ggsave("output/news-disasters-bigrams.png", width = 100, height = 100, units = "mm")
+plot_bigram(news_disasters, custom_stop_words, 2, "Disasters & Emergencies")
+ggsave("output/news-disasters-bigrams.png", width = 200, height = 100, units = "mm")
 
 # - Displacement and migration -
-plot_bigram(news_displacement, custom_stop_words, 2)
-ggsave("output/news-displacement-bigrams.png", width = 100, height = 100, units = "mm")
+plot_bigram(news_displacement, custom_stop_words, 2, "Displacement & Migration")
+ggsave("output/news-displacement-bigrams.png", width = 200, height = 100, units = "mm")
 
 # ---- Topic models ----
 #' Document term matrices for each cause
