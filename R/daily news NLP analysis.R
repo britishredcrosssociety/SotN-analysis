@@ -134,28 +134,48 @@ plot_unigram(news_displacement, custom_stop_words, 2)
 ggsave("output/news-displacement-word-counts.png", width = 100, height = 100, units = "mm")
 
 # ---- Bigrams ----
-health_bigrams <- 
-  news_health |> 
-  unnest_tokens(bigram, text, token = "ngrams", n = 2) |> 
-  separate(bigram, c("word1", "word2"), sep = " ") |> 
-  filter(!word1 %in% c(stop_words$word, custom_stop_words_health$word)) |>
-  filter(!word2 %in% c(stop_words$word, custom_stop_words_health$word)) |> 
-  unite(bigram, word1, word2, sep = " ")
+#' Plot bigrams
+#' @param news A tibble/dataframe containing the text to parse
+#' @param custom_stop_words A tibble/dataframe containing custom stop words
+#' @param n_to_display Plot words appearing at least this number of times
+#' @return ggplot of bigrams
+plot_bigram <- function(news, custom_stop_words, n_to_display) {
+  bigrams <- 
+    news |> 
+    unnest_tokens(bigram, text, token = "ngrams", n = 2) |> 
+    separate(bigram, c("word1", "word2"), sep = " ") |> 
+    filter(!word1 %in% c(stop_words$word, custom_stop_words$word)) |>
+    filter(!word2 %in% c(stop_words$word, custom_stop_words$word)) |> 
+    unite(bigram, word1, word2, sep = " ")
+  
+  # Plot
+  plt <- 
+    bigrams |> 
+    count(bigram, sort = TRUE) |> 
+    filter(n >= n_to_display) |>
+    mutate(bigram = reorder(bigram, n)) |>
+    ggplot(aes(n, bigram)) +
+    geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
+    labs(
+      x = "Number of times mentioned",
+      y = NULL
+    ) +
+    theme_classic()
+  
+  plt
+}
 
-# Plot
-health_bigrams |> 
-  count(bigram, sort = TRUE) |> 
-  filter(n > 1) |>
-  mutate(bigram = reorder(bigram, n)) |>
-  ggplot(aes(n, bigram)) +
-  geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
-  labs(
-    x = "Number of times mentioned",
-    y = NULL
-  ) +
-  theme_classic()
+# - Health inequalities -
+plot_bigram(news_health, custom_stop_words, 2)
+ggsave("output/news-health-bigrams.png", width = 100, height = 100, units = "mm")
 
-ggsave("output/news-bigrams.png", width = 100, height = 100, units = "mm")
+# - Disasters and emergencies -
+plot_bigram(news_disasters, custom_stop_words, 2)
+ggsave("output/news-disasters-bigrams.png", width = 100, height = 100, units = "mm")
+
+# - Displacement and migration -
+plot_bigram(news_displacement, custom_stop_words, 2)
+ggsave("output/news-displacement-bigrams.png", width = 100, height = 100, units = "mm")
 
 # ---- Topic models ----
 # Document term matrix
