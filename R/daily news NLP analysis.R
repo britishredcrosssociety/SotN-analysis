@@ -54,38 +54,75 @@ news |>
 
 ggsave("output/news-cause-mentions.png", width = 100, height = 100, units = "mm")
 
+# ---- Figure out custom stop words ----
+#' Count most frequent words
+#' @param news A tibble/dataframe containing the text to parse
+#' @return Tibble containing word frequencies
+word_frequency <- function(news) {
+  news |> 
+    unnest_tokens(word, text) |> 
+    anti_join(stop_words) |> 
+    count(word, sort = TRUE)
+}
+
+# - Inspect top words and remove "junk" words -
+# Health inequalities
+common_words_health <- 
+  word_frequency(news_health)
+
+View(common_words_health)
+
+# Disasters and emergencies
+common_words_disasters <- 
+  word_frequency(news_disasters)
+
+View(common_words_disasters)
+
+# Displacement and migration
+common_words_displacement <- 
+  word_frequency(news_displacement)
+
+View(common_words_displacement)
+
+# - Manually fill these out based on the most common words we want to remove -
+custom_stop_words <- 
+  tibble(word = c("people", "19", "reports", "report", "research", "online",
+                  "sky", "guardian", "independent", "bbc", "news", "radio",
+                  "red", "cross", "al", "jazeera"))
+
 # ---- Unigrams ----
-# Tokenize text column to unigrams
-health_words <-
-  news_health |> 
-  unnest_tokens(word, text) |> 
-  anti_join(stop_words)
+#' Plot unigrams
+#' @param news A tibble/dataframe containing the text to parse
+#' @param custom_stop_words A tibble/dataframe containing custom stop words
+#' @param n_to_display Plot words appearing at least this number of times
+#' @return ggplot of unigrams
+plot_unigram <- function(news, custom_stop_words, n_to_display) {
+  # Tokenize text column to unigrams
+  news_words <-
+    news |> 
+    unnest_tokens(word, text) |> 
+    anti_join(stop_words) |> 
+    anti_join(custom_stop_words)
+  
+  # Plot word counts
+  plt <- 
+    news_words |> 
+    count(word, sort = TRUE) |> 
+    filter(n >= n_to_display) |> 
+    mutate(word = reorder(word, n)) |> 
+    ggplot(aes(n, word)) +
+    geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
+    labs(
+      x = "Number of times mentioned",
+      y = NULL
+    ) +
+    theme_classic()
+  
+  plt
+}
 
-# Inspect top words and remove "junk" words
-most_frequent_words <-
-  health_words |> 
-  count(word, sort = TRUE)
-
-custom_stop_words_health <- 
-  tibble(word = c("bbc", "news", "people", "19", "reports", "sky", "guardian", "independent", "report", "research", "online", "radio"))
-
-health_words <- 
-  health_words |> 
-  anti_join(custom_stop_words_health)
-
-# Plot word counts
-health_words |> 
-  count(word, sort = TRUE) |> 
-  filter(n > 2) |> 
-  mutate(word = reorder(word, n)) |> 
-  ggplot(aes(n, word)) +
-  geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
-  labs(
-    x = "Number of times mentioned",
-    y = NULL
-  ) +
-  theme_classic()
-
+# - Health inequalities -
+plot_unigram(news_health, custom_stop_words, 3)
 ggsave("output/news-word-counts.png", width = 100, height = 100, units = "mm")
 
 # ---- Bigrams ----
