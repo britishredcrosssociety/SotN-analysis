@@ -6,10 +6,18 @@ library(viridis)
 library(ggfittext)
 
 # ---- Load and prep data ----
-news <- read_lines("data/daily-news-2021-08.txt") |> 
-  as_tibble() |> 
-  rename(text = value) |> 
-  filter(text != "")
+# Load news from the last three months
+# Note that the articles/snippets appear in reverse chronological order (at least when Matt has gathered the data)
+read_news <- function(file) {
+  read_lines(file) |> 
+    as_tibble() |> 
+    rename(text = value) |> 
+    filter(text != "")
+}
+
+news <- 
+  list.files(path = "data/daily-news/", pattern = "*.txt", full.names = TRUE) %>% 
+  map_df(~read_news(.))
 
 news_health <- 
   news |> 
@@ -39,6 +47,7 @@ news_climate <-
 # ---- How often does each cause get mentioned / have a news item? ---
 news |> 
   mutate(first_word = str_extract(text, "\\w+")) |> 
+  filter(first_word %in% c("Health", "Disasters", "Displacement")) |> 
   count(first_word) |> 
   arrange(desc(n)) |> 
   mutate(first_word = reorder(first_word, n)) |> 
@@ -122,15 +131,15 @@ plot_unigram <- function(news, custom_stop_words, n_to_display) {
 }
 
 # - Health inequalities -
-plot_unigram(news_health, custom_stop_words, 3)
+plot_unigram(news_health, custom_stop_words, 5)
 ggsave("output/news-health-word-counts.png", width = 100, height = 100, units = "mm")
 
 # - Disasters and emergencies -
-plot_unigram(news_disasters, custom_stop_words, 2)
+plot_unigram(news_disasters, custom_stop_words, 5)
 ggsave("output/news-disasters-word-counts.png", width = 100, height = 100, units = "mm")
 
 # - Displacement and migration -
-plot_unigram(news_displacement, custom_stop_words, 2)
+plot_unigram(news_displacement, custom_stop_words, 5)
 ggsave("output/news-displacement-word-counts.png", width = 100, height = 100, units = "mm")
 
 # ---- Bigrams ----
