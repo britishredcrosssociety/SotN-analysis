@@ -178,12 +178,27 @@ plot_bigram(news_displacement, custom_stop_words, 2)
 ggsave("output/news-displacement-bigrams.png", width = 100, height = 100, units = "mm")
 
 # ---- Topic models ----
-# Document term matrix
-dtm <-
-  health_words  |> 
-  add_rownames() |> 
-  count(rowname, word) |> 
-  cast_dtm(rowname, word, n)
+#' Document term matrices for each cause
+#' @param news A tibble/dataframe containing the text to parse
+#' @return DocumentTermMatrix
+get_dtm <- function(news) {
+  news |> 
+    unnest_tokens(word, text) |> 
+    anti_join(stop_words) |> 
+    anti_join(custom_stop_words) |> 
+    add_rownames() |> 
+    count(rowname, word) |> 
+    cast_dtm(rowname, word, n)
+}
+
+dtm_health <-
+  get_dtm(news_health)
+
+dtm_disasters <-
+  get_dtm(news_disasters)
+
+dtm_displacement <-
+  get_dtm(news_displacement)
 
 # Select number of topics (k) for LDA model using the 'ldatuninig' package.
 lda_fit <-
