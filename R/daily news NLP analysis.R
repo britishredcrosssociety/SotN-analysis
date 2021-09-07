@@ -3,6 +3,7 @@ library(tidytext)
 library(topicmodels)
 library(ldatuning)
 library(viridis)
+library(ggfittext)
 
 # ---- Load and prep data ----
 news <- read_lines("data/daily-news-2021-08.txt") |> 
@@ -34,6 +35,24 @@ news_climate <-
   mutate(text = str_remove(text, "Climate: ")) |> 
   mutate(text = str_remove(text, "Climate change: ")) |> 
   mutate(text = str_to_lower(text))
+
+# ---- How often does each cause get mentioned / have a news item? ---
+news |> 
+  mutate(first_word = str_extract(text, "\\w+")) |> 
+  count(first_word) |> 
+  arrange(desc(n)) |> 
+  mutate(first_word = reorder(first_word, n)) |> 
+  
+  ggplot(aes(n, first_word, label = n)) +
+  geom_col(fill = "#D0021B", alpha = 0.5, show.legend = FALSE) +
+  geom_bar_text() +
+  labs(
+    x = "Number of times mentioned",
+    y = NULL
+  ) +
+  theme_classic()
+
+ggsave("output/news-cause-mentions.png", width = 100, height = 100, units = "mm")
 
 # ---- Unigrams ----
 # Tokenize text column to unigrams
