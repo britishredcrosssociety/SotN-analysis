@@ -123,7 +123,15 @@ plot_unigram <- function(news, custom_stop_words, n_to_display) {
 
 # - Health inequalities -
 plot_unigram(news_health, custom_stop_words, 3)
-ggsave("output/news-word-counts.png", width = 100, height = 100, units = "mm")
+ggsave("output/news-health-word-counts.png", width = 100, height = 100, units = "mm")
+
+# - Disasters and emergencies -
+plot_unigram(news_disasters, custom_stop_words, 2)
+ggsave("output/news-disasters-word-counts.png", width = 100, height = 100, units = "mm")
+
+# - Displacement and migration -
+plot_unigram(news_displacement, custom_stop_words, 2)
+ggsave("output/news-displacement-word-counts.png", width = 100, height = 100, units = "mm")
 
 # ---- Bigrams ----
 health_bigrams <- 
