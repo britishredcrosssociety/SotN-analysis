@@ -271,3 +271,16 @@ ggsave("output/news-disasters-topics.png", width = 250, height = 150, units = "m
 # - Displacement and migration - 
 plot_topics(dtm_displacement, k = 4, "Displacement and migration")
 ggsave("output/news-displacement-topics.png", width = 250, height = 150, units = "mm")
+
+# ---- Further exploration ----
+news_health |> 
+  filter(str_detect(text, "pregnant"))
+
+news_health |> 
+  filter(str_detect(text, "cancer") & str_detect(text, "mental"))
+
+news_disasters |> 
+  filter(str_detect(text, "water"))
+
+news_displacement |> 
+  filter(str_detect(text, "violen"))
