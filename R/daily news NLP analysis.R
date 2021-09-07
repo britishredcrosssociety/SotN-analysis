@@ -200,45 +200,65 @@ dtm_disasters <-
 dtm_displacement <-
   get_dtm(news_displacement)
 
+# - Work out how many topics (k) to calculate for each cause (have to do this a bit manually) -
 # Select number of topics (k) for LDA model using the 'ldatuninig' package.
 lda_fit <-
   FindTopicsNumber(
-    dtm,
+    # Choose one:
+    # dtm_health,
+    # dtm_disasters,
+    dtm_displacement,
+    
     topics = seq(from = 2, to = 10, by = 1),
     metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
     method = "Gibbs", control = list(seed = 77), mc.cores = 2L, verbose = TRUE
   )
-# 
-# lda_fit %>% write_rds("analysis/vaccines/data/lda-fit.rds")
 
 # find the extremum to determine optimal k
 FindTopicsNumber_plot(lda_fit)
 
-lda <- LDA(dtm, k = 5, control = list(seed = 1234))
+#' Plot topics
+#' @param dtm The DocumentTermMatrix to use
+#' @param k Number of topics to model
+#' @param cause_name Name of the cause, for the plot title
+#' @return ggplot of topics
+plot_topics <- function(dtm, k, cause_name) {
+  lda <- LDA(dtm, k = k, control = list(seed = 1234))
+  topics <- tidy(lda, matrix = "beta")
+  
+  top_terms <- 
+    topics |>
+    group_by(topic) |>
+    top_n(10, beta) |>
+    ungroup() |>
+    arrange(topic, -beta)
+  
+  # - plot -
+  plt <- 
+    top_terms |>
+    mutate(term = reorder_within(term, beta, topic)) |>
+    ggplot(aes(beta, term, fill = factor(topic))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~topic, nrow = 2, ncol = 5, scales = "free") +
+    scale_y_reordered() +
+    theme_minimal() +
+    scale_fill_viridis(discrete = T, begin = .15, end = .85, alpha = .8) + 
+    labs(y = NULL,
+         title = glue::glue("Naturally occuring topics related to {cause_name}"),
+         subtitle = "The beta value is the probability that any given word belongs to a topic",
+         caption = "Colour denotes topic number.")
+  
+  plt
+}
 
-# lda %>% write_rds("analysis/vaccines/data/lda-data.rds")
-
-health_topics <- tidy(lda, matrix = "beta")
-
-top_terms <- 
-  health_topics |>
-  group_by(topic) |>
-  top_n(10, beta) |>
-  ungroup() |>
-  arrange(topic, -beta)
-
-# - plot -
-top_terms |>
-  mutate(term = reorder_within(term, beta, topic)) |>
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~topic, nrow = 2, ncol = 5, scales = "free") +
-  scale_y_reordered() +
-  theme_minimal() +
-  scale_fill_viridis(discrete = T, begin = .15, end = .85, alpha = .8) + 
-  labs(y = NULL,
-       title = "Naturally occuring topics related to Health Inequalities",
-       subtitle = "The beta value is the probability that any given word belongs to a topic",
-       caption = "Colour denotes topic number.")
-
+# - Health inequalities - 
+plot_topics(dtm_health, k = 5, "Health inequalities")
 ggsave("output/news-health-topics.png", width = 250, height = 150, units = "mm")
+
+# - Disasters and emergencies - 
+plot_topics(dtm_disasters, k = 4, "Disasters and emergencies")
+ggsave("output/news-disasters-topics.png", width = 250, height = 150, units = "mm")
+
+# - Displacement and migration - 
+plot_topics(dtm_displacement, k = 4, "Displacement and migration")
+ggsave("output/news-displacement-topics.png", width = 250, height = 150, units = "mm")
