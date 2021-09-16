@@ -2,12 +2,15 @@ library(tidyverse)
 library(readxl)
 library(plotly)
 
+survey_date <- "July 2021"
+
 # ---- Common functions ----
 clean_after_loading <- function(d) {
   d %>% 
     rename(Answer = `...1`) %>% 
     filter(!is.na(Answer)) %>%   # keep only percentages
-    filter(Answer != "Return to index")
+    filter(Answer != "Return to index") |> 
+    rename(London = `London...23`)
 }
 
 #' Regional bar plots
@@ -37,7 +40,7 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
     
   } else {
     bar_palette <- c(
-      viridis::magma(length(unique(d$Answer)) - 1),
+      viridis::rocket(length(unique(d$Answer)) - 1),
       "#bdbdbd"   # Prefer not to say
     )
   }
@@ -59,7 +62,7 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
     mutate(Region = factor(Region, levels = unique(Region))) %>% 
     
     ggplot(aes(x = Region, y = Percentage, fill = Answer)) +
-    geom_col() +
+    geom_col(colour = "white") +
     geom_text(aes(label = bar_label), size = 3, position = position_stack(vjust = 0.5)) +
     coord_flip() +
     scale_y_continuous(labels = scales::percent) +
@@ -71,8 +74,8 @@ plot_regional_answers <- function(d, answer_to_label, plot_title, question) {
       y = "Percentage of respondents",
       fill = "",
       title = plot_title,
-      subtitle = paste0("Survey question: ", question)
-      # caption = "Source: Opinium survey"
+      subtitle = paste0("Survey question: ", question),
+      caption = paste0("Source: British Red Cross / Opinium survey, ", survey_date)
     ) +
     theme(
       # plot.caption = element_text(hjust = 0), #Default is hjust=1
@@ -616,14 +619,14 @@ down_regional <-
   plot_regional_answers(
     down_regional,
     answer_to_label = "Nearly every day", 
-    plot_title = "Down/depressed", 
+    plot_title = NULL,  #"Down/depressed", 
     question = "Over the last two weeks, how often have you been bothered by feeling down, depressed, or hopeless?"
   ))
 
 ggsave(
   plot = plt_down,
   filename = "output/regional/down.png",
-  height = 150, width = 150, units = "mm"
+  height = 150, width = 220, units = "mm"
 )
 
 # ---- Received mental health support ----
