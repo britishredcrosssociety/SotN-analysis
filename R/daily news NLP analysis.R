@@ -4,19 +4,25 @@ library(topicmodels)
 library(ldatuning)
 library(viridis)
 library(ggfittext)
+library(lubridate)
 
 # ---- Load and prep data ----
 # Load news from the last three months
 # Note that the articles/snippets appear in reverse chronological order (at least when Matt has gathered the data)
 read_news <- function(file) {
+  # Get date from the filename
+  news_month <- str_extract(file, "[0-9]+-[0-9]+") |> ym()
+  
   read_lines(file) |> 
     as_tibble() |> 
     rename(text = value) |> 
-    filter(text != "")
+    filter(text != "") |> 
+    mutate(Date = news_month) |> 
+    relocate(Date)
 }
 
 news <- 
-  list.files(path = "data/daily-news/", pattern = "*.txt", full.names = TRUE) %>% 
+  list.files(path = "data/daily-news/", pattern = "*.txt", full.names = TRUE) |> 
   map_df(~read_news(.))
 
 news_health <- 
@@ -133,15 +139,15 @@ plot_unigram <- function(news, custom_stop_words, n_to_display, cause_name) {
 }
 
 # - Health inequalities -
-plot_unigram(news_health, custom_stop_words, 5, "Health Inequalities")
+plot_unigram(news_health, custom_stop_words, 7, "Health Inequalities")
 ggsave("output/news-health-word-counts.png", width = 200, height = 100, units = "mm")
 
 # - Disasters and emergencies -
-plot_unigram(news_disasters, custom_stop_words, 5, "Disasters & Emergencies")
+plot_unigram(news_disasters, custom_stop_words, 7, "Disasters & Emergencies")
 ggsave("output/news-disasters-word-counts.png", width = 200, height = 100, units = "mm")
 
 # - Displacement and migration -
-plot_unigram(news_displacement, custom_stop_words, 5, "Displacement & Migration")
+plot_unigram(news_displacement, custom_stop_words, 7, "Displacement & Migration")
 ggsave("output/news-displacement-word-counts.png", width = 200, height = 100, units = "mm")
 
 # ---- Bigrams ----
@@ -179,15 +185,15 @@ plot_bigram <- function(news, custom_stop_words, n_to_display, cause_name) {
 }
 
 # - Health inequalities -
-plot_bigram(news_health, custom_stop_words, 2, "Health Inequalities")
+plot_bigram(news_health, custom_stop_words, 3, "Health Inequalities")
 ggsave("output/news-health-bigrams.png", width = 200, height = 100, units = "mm")
 
 # - Disasters and emergencies -
-plot_bigram(news_disasters, custom_stop_words, 2, "Disasters & Emergencies")
+plot_bigram(news_disasters, custom_stop_words, 3, "Disasters & Emergencies")
 ggsave("output/news-disasters-bigrams.png", width = 200, height = 100, units = "mm")
 
 # - Displacement and migration -
-plot_bigram(news_displacement, custom_stop_words, 2, "Displacement & Migration")
+plot_bigram(news_displacement, custom_stop_words, 3, "Displacement & Migration")
 ggsave("output/news-displacement-bigrams.png", width = 200, height = 100, units = "mm")
 
 # ---- Topic models ----
@@ -199,7 +205,7 @@ get_dtm <- function(news) {
     unnest_tokens(word, text) |> 
     anti_join(stop_words) |> 
     anti_join(custom_stop_words) |> 
-    add_rownames() |> 
+    rownames_to_column() |> 
     count(rowname, word) |> 
     cast_dtm(rowname, word, n)
 }
@@ -288,3 +294,31 @@ news_disasters |>
 
 news_displacement |> 
   filter(str_detect(text, "violen"))
+
+# ---- TF-IDF ----
+book_words <- 
+  news_health |> 
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words) |> 
+  anti_join(custom_stop_words) |> 
+  count(Date, word, sort = TRUE)
+
+total_words <- 
+  book_words %>% 
+  group_by(Date) %>% 
+  summarize(total = sum(n))
+
+book_words <- left_join(book_words, total_words)
+
+book_tf_idf <- 
+  book_words |> 
+  bind_tf_idf(word, Date, n)
+
+book_tf_idf %>%
+  group_by(Date) %>%
+  slice_max(tf_idf, n = 10) %>%
+  ungroup() %>%
+  ggplot(aes(tf_idf, fct_reorder(word, tf_idf), fill = Date)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~Date, ncol = 2, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
