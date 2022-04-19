@@ -2,6 +2,8 @@
 library(tidyverse)
 library(tidymodels)
 library(readxl)
+library(viridis)
+library(hrbrthemes)
 
 # Polling data is stored in our Teams site under:
 # Strategic Insight and Foresight > Data > Polls
@@ -49,6 +51,13 @@ demographics <-
     city = Nearest_City.a,
     ruc = OP18518_D5.a,
     ethnicity = OP18518_D11.a
+  ) |>
+  mutate(
+    age = if_else(
+      age == "Over 80",
+      "80",
+      age
+    )
   )
 
 # - Q1 -
@@ -239,3 +248,48 @@ lonely <-
     id,
     lonely = OP18518_Q11.a
   )
+
+# ---- Mental Health Models ----
+mental_health_data <-
+  demographics |>
+  left_join(anxious, by = "id") |>
+  left_join(depressed, by = "id") |>
+  left_join(received_mental_health_support, by = "id") |>
+  left_join(waiting_mental_health_support, by = "id")
+
+# convert col types
+mental_health_factors <-
+  mental_health_data |>
+  mutate(
+    across(
+      all_of(
+        c(
+          "gender",
+          "region",
+          "social_grade",
+          "ruc", "ethnicity",
+          "depressed",
+          "received_mental_health_support",
+          "waiting_mental_health_support"
+        )
+      ),
+      factor
+    )
+  ) |>
+  mutate(
+    across(
+      all_of(c("age", "anxious")), as.integer
+    )
+  )
+
+# - EDA -
+# Is age related to levels of depression?
+mental_health_factors |> 
+  select(gender, age, ethnicity, depressed) |> 
+  ggplot(aes(x = depressed, y = age, fill = depressed)) +
+  geom_boxplot(alpha = 0.5) +
+  scale_fill_viridis(discrete = TRUE) +
+  coord_flip() +
+  theme_ipsum() +
+  geom_jitter(color="black", size=0.4, alpha=0.5) +
+  theme(legend.position="none")
