@@ -432,3 +432,118 @@ mental_health_types |>
   filter(depressed == "More than half the days" | depressed == "Nearly every day") |>
   summarise(prop = sum(prop)) |>
   arrange(prop)
+
+# - Physical health -
+physical_health_data <-
+  demographics |>
+  left_join(mobility, by = "id") |>
+  left_join(daily_activites, by = "id") |>
+  left_join(usual_activites, by = "id") |>
+  select(-id, -city, -region)
+
+# Relationship to RUC
+physical_health_data |>
+  mutate(
+    ruc = case_when(
+      ruc == "Rural area - villages or hamlets" ~ "Rural",
+      ruc == "Suburban area - residential areas on the outskirts of cities and towns" ~ "Suburban",
+      ruc == "Urban area - cities or towns" ~ "Urban"
+    )
+  ) |>
+  count(ruc, mobility) |>
+  group_by(ruc) |>
+  mutate(prop = n / sum(n)) |>
+  filter(mobility == "I have extreme problems in walking about" | mobility == "I have severe problems in walking about") |>
+  summarise(prop = sum(prop))
+
+physical_health_data |>
+  mutate(
+    ruc = case_when(
+      ruc == "Rural area - villages or hamlets" ~ "Rural",
+      ruc == "Suburban area - residential areas on the outskirts of cities and towns" ~ "Suburban",
+      ruc == "Urban area - cities or towns" ~ "Urban"
+    )
+  ) |>
+  count(ruc, daily_activities) |>
+  group_by(ruc) |>
+  mutate(prop = n / sum(n)) |>
+  filter(daily_activities == "Yes, limited a lot") |>
+  summarise(prop = sum(prop))
+
+physical_health_data |>
+  mutate(
+    ruc = case_when(
+      ruc == "Rural area - villages or hamlets" ~ "Rural",
+      ruc == "Suburban area - residential areas on the outskirts of cities and towns" ~ "Suburban",
+      ruc == "Urban area - cities or towns" ~ "Urban"
+    )
+  ) |>
+  count(ruc, usual_activities) |>
+  group_by(ruc) |>
+  mutate(prop = n / sum(n)) |>
+  filter(usual_activities == "I have extreme problems doing my usual activities" | usual_activities == "I have severe problems doing my usual activities") |>
+  summarise(prop = sum(prop))
+
+# Age and mobility
+physical_health_data |>
+  mutate(age = as.integer(age)) |>
+  filter(age >= 55) |>
+  count(gender, mobility) |>
+  drop_na() |>
+  group_by(gender) |>
+  mutate(prop = n / sum(n)) |>
+  filter(mobility == "I have extreme problems in walking about" | mobility == "I have severe problems in walking about") |>
+  summarise(prop = sum(prop))
+
+# - Financial difficulties -
+in_debt_ids <-
+  experiences |>
+  filter(
+    experience == "behind_bills" |
+      experience == "behind_rent_mortgage" |
+      experience == "serious_debt"
+  ) |>
+  filter(experience_value == 1) |>
+  distinct(id) |>
+  pull(id)
+
+demographics |>
+  select(id, gender, age, region) |>
+  mutate(in_debt = if_else(id %in% in_debt_ids, "yes", "no")) |> 
+  count(region, in_debt) |>
+  group_by(region) |> 
+  mutate(prop = n/sum(n)) |> 
+  filter(in_debt == "yes") |> 
+  ungroup() |> 
+  mutate(region = fct_reorder(region, prop)) |> 
+  ggplot(aes(x = region, y = prop)) +
+  geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
+  theme_ipsum() +
+  coord_flip() +
+  labs(
+    x = NULL, 
+    y = "Percentage in debt",
+    title = "% people in serious debt or struggling to pay bills by region"
+  ) +
+  scale_y_continuous(labels = scales::percent)
+
+demographics |>
+  select(id, gender, age, region) |>
+  filter(gender == "Male" | gender == "Female") |> 
+  mutate(in_debt = if_else(id %in% in_debt_ids, "yes", "no")) |> 
+  count(gender, in_debt) |>
+  group_by(gender) |> 
+  mutate(prop = n/sum(n)) |> 
+  filter(in_debt == "yes") |> 
+  ungroup()
+
+demographics |>
+  select(id, gender, age, region) |>
+  mutate(in_debt = if_else(id %in% in_debt_ids, "yes", "no")) |> 
+  mutate(age = as.integer(age)) |> 
+  ggplot(aes(x = age, y = in_debt)) + 
+  geom_boxplot(alpha = 0.5) +
+  scale_fill_viridis(discrete = TRUE) +
+  theme_ipsum() +
+  geom_jitter(color = "black", size = 0.4, alpha = 0.5) +
+  theme(legend.position = "none")
