@@ -258,7 +258,7 @@ mental_health_data <-
   left_join(waiting_mental_health_support, by = "id")
 
 # convert col types
-mental_health_factors <-
+mental_health_types <-
   mental_health_data |>
   mutate(
     across(
@@ -291,5 +291,34 @@ mental_health_factors |>
   scale_fill_viridis(discrete = TRUE) +
   coord_flip() +
   theme_ipsum() +
-  geom_jitter(color="black", size=0.4, alpha=0.5) +
-  theme(legend.position="none")
+  geom_jitter(color = "black", size = 0.4, alpha = 0.5) +
+  theme(legend.position = "none")
+
+# Is ethnicity related to mental health support?
+mental_health_factors |> 
+  select(ethnicity, ends_with("health_support")) |> 
+  filter(received_mental_health_support != "Prefer not to say") |> 
+  count(ethnicity, received_mental_health_support) |> 
+  group_by(ethnicity) |> 
+  mutate(prop_receiving_support = n / sum(n)) |> 
+  ungroup() |> 
+  filter(received_mental_health_support == "Yes") |> 
+  ggplot(aes(x = ethnicity, y = prop_receiving_support)) +
+  geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
+  coord_flip() +
+  theme(legend.position = "none") +
+  theme_ipsum()
+
+mental_health_factors |> 
+  select(ethnicity, ends_with("health_support")) |> 
+  filter(waiting_mental_health_support != "Prefer not to say") |> 
+  count(ethnicity, waiting_mental_health_support) |> 
+  group_by(ethnicity) |> 
+  mutate(prop_waiting_support = n / sum(n)) |> 
+  ungroup() |> 
+  filter(waiting_mental_health_support == "Yes") |> 
+  ggplot(aes(x = ethnicity, y = prop_waiting_support)) +
+  geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
+  coord_flip() +
+  theme(legend.position = "none") +
+  theme_ipsum()
