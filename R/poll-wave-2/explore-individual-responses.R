@@ -355,6 +355,11 @@ mental_health_types |>
 
 # Is RUC related to mental health support?
 mental_health_types |>
+  mutate(ruc = case_when(
+    ruc == "Rural area - villages or hamlets" ~ "Rural",
+    ruc == "Suburban area - residential areas on the outskirts of cities and towns" ~ "Suburban",
+    ruc == "Urban area - cities or towns" ~ "Urban"
+  )) |>
   select(ruc, ends_with("health_support")) |>
   filter(waiting_mental_health_support != "Prefer not to say") |>
   count(ruc, waiting_mental_health_support) |>
@@ -365,7 +370,13 @@ mental_health_types |>
   geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
   coord_flip() +
   theme(legend.position = "none") +
-  theme_ipsum()
+  theme_ipsum() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL,
+    y = "Percentage waiting for support",
+    title = "% of people waiting for Mental Health Support vs. rurality"
+  )
 
 mental_health_types |>
   select(ruc, ends_with("health_support")) |>
@@ -419,5 +430,5 @@ mental_health_types |>
   group_by(social_grade) |>
   mutate(prop = n / sum(n)) |>
   filter(depressed == "More than half the days" | depressed == "Nearly every day") |>
-  summarise(prop = sum(prop)) |> 
+  summarise(prop = sum(prop)) |>
   arrange(prop)
