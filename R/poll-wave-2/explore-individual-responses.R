@@ -267,7 +267,8 @@ mental_health_types <-
           "gender",
           "region",
           "social_grade",
-          "ruc", "ethnicity",
+          "ruc",
+          "ethnicity",
           "depressed",
           "received_mental_health_support",
           "waiting_mental_health_support"
@@ -284,8 +285,8 @@ mental_health_types <-
 
 # - EDA -
 # Is age related to levels of depression?
-mental_health_factors |> 
-  select(gender, age, ethnicity, depressed) |> 
+mental_health_types |>
+  select(gender, age, ethnicity, depressed) |>
   ggplot(aes(x = depressed, y = age, fill = depressed)) +
   geom_boxplot(alpha = 0.5) +
   scale_fill_viridis(discrete = TRUE) +
@@ -295,28 +296,28 @@ mental_health_factors |>
   theme(legend.position = "none")
 
 # Is ethnicity related to mental health support?
-mental_health_factors |> 
-  select(ethnicity, ends_with("health_support")) |> 
-  filter(received_mental_health_support != "Prefer not to say") |> 
-  count(ethnicity, received_mental_health_support) |> 
-  group_by(ethnicity) |> 
-  mutate(prop_receiving_support = n / sum(n)) |> 
-  ungroup() |> 
-  filter(received_mental_health_support == "Yes") |> 
+mental_health_types |>
+  select(ethnicity, ends_with("health_support")) |>
+  filter(received_mental_health_support != "Prefer not to say") |>
+  count(ethnicity, received_mental_health_support) |>
+  group_by(ethnicity) |>
+  mutate(prop_receiving_support = n / sum(n)) |>
+  ungroup() |>
+  filter(received_mental_health_support == "Yes") |>
   ggplot(aes(x = ethnicity, y = prop_receiving_support)) +
   geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
   coord_flip() +
   theme(legend.position = "none") +
   theme_ipsum()
 
-mental_health_factors |> 
-  select(ethnicity, ends_with("health_support")) |> 
-  filter(waiting_mental_health_support != "Prefer not to say") |> 
-  count(ethnicity, waiting_mental_health_support) |> 
-  group_by(ethnicity) |> 
-  mutate(prop_waiting_support = n / sum(n)) |> 
-  ungroup() |> 
-  filter(waiting_mental_health_support == "Yes") |> 
+mental_health_types |>
+  select(ethnicity, ends_with("health_support")) |>
+  filter(waiting_mental_health_support != "Prefer not to say") |>
+  count(ethnicity, waiting_mental_health_support) |>
+  group_by(ethnicity) |>
+  mutate(prop_waiting_support = n / sum(n)) |>
+  ungroup() |>
+  filter(waiting_mental_health_support == "Yes") |>
   ggplot(aes(x = ethnicity, y = prop_waiting_support)) +
   geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
   coord_flip() +
@@ -324,30 +325,99 @@ mental_health_factors |>
   theme_ipsum()
 
 # Is gender related to mental health support?
-mental_health_factors |> 
-  select(gender, ends_with("health_support")) |> 
-  filter(waiting_mental_health_support != "Prefer not to say") |> 
-  filter(gender == "Female" | gender == "Male") |> 
-  count(gender, waiting_mental_health_support) |> 
-  group_by(gender) |> 
-  mutate(prop_waiting_support = n / sum(n)) |> 
-  filter(waiting_mental_health_support == "Yes") |> 
+mental_health_types |>
+  select(gender, ends_with("health_support")) |>
+  filter(waiting_mental_health_support != "Prefer not to say") |>
+  filter(gender == "Female" | gender == "Male") |>
+  count(gender, waiting_mental_health_support) |>
+  group_by(gender) |>
+  mutate(prop_waiting_support = n / sum(n)) |>
+  filter(waiting_mental_health_support == "Yes") |>
   ggplot(aes(x = gender, y = prop_waiting_support)) +
   geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
   coord_flip() +
   theme(legend.position = "none") +
   theme_ipsum()
 
-mental_health_factors |> 
+mental_health_types |>
   select(gender, ends_with("health_support")) |>
-  filter(received_mental_health_support != "Prefer not to say") |> 
-  filter(gender == "Female" | gender == "Male") |> 
-  count(gender, received_mental_health_support) |> 
-  group_by(gender) |> 
-  mutate(prop_received_support = n / sum(n)) |> 
-  filter(received_mental_health_support == "Yes") |> 
+  filter(received_mental_health_support != "Prefer not to say") |>
+  filter(gender == "Female" | gender == "Male") |>
+  count(gender, received_mental_health_support) |>
+  group_by(gender) |>
+  mutate(prop_received_support = n / sum(n)) |>
+  filter(received_mental_health_support == "Yes") |>
   ggplot(aes(x = gender, y = prop_received_support)) +
   geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
   coord_flip() +
   theme(legend.position = "none") +
   theme_ipsum()
+
+# Is RUC related to mental health support?
+mental_health_types |>
+  select(ruc, ends_with("health_support")) |>
+  filter(waiting_mental_health_support != "Prefer not to say") |>
+  count(ruc, waiting_mental_health_support) |>
+  group_by(ruc) |>
+  mutate(prop_waiting_support = n / sum(n)) |>
+  filter(waiting_mental_health_support == "Yes") |>
+  ggplot(aes(x = ruc, y = prop_waiting_support)) +
+  geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
+  coord_flip() +
+  theme(legend.position = "none") +
+  theme_ipsum()
+
+mental_health_types |>
+  select(ruc, ends_with("health_support")) |>
+  filter(received_mental_health_support != "Prefer not to say") |>
+  count(ruc, received_mental_health_support) |>
+  group_by(ruc) |>
+  mutate(prop_received_support = n / sum(n)) |>
+  filter(received_mental_health_support == "Yes") |>
+  ggplot(aes(x = ruc, y = prop_received_support)) +
+  geom_col(fill = "#D0021B", alpha = 0.5, colour = "black") +
+  coord_flip() +
+  theme(legend.position = "none") +
+  theme_ipsum()
+
+# Is RUC realted to anxiety?
+mental_health_types |>
+  mutate(ruc = case_when(
+    ruc == "Rural area - villages or hamlets" ~ "Rural",
+    ruc == "Suburban area - residential areas on the outskirts of cities and towns" ~ "Suburban",
+    ruc == "Urban area - cities or towns" ~ "Urban"
+  )) |>
+  select(ruc, anxious) |>
+  ggplot(aes(x = anxious, y = ruc, fill = ruc)) +
+  geom_boxplot(alpha = 0.5) +
+  scale_fill_viridis(discrete = TRUE) +
+  theme_ipsum() +
+  geom_jitter(color = "black", size = 0.4, alpha = 0.5) +
+  theme(legend.position = "none") +
+  labs(y = NULL, x = "Anxiety (out of 10)")
+
+# Is RUC related to depression?
+mental_health_types |>
+  mutate(ruc = case_when(
+    ruc == "Rural area - villages or hamlets" ~ "Rural",
+    ruc == "Suburban area - residential areas on the outskirts of cities and towns" ~ "Suburban",
+    ruc == "Urban area - cities or towns" ~ "Urban"
+  )) |>
+  select(ruc, depressed) |>
+  count(ruc, depressed) |>
+  group_by(ruc) |>
+  mutate(prop = n / sum(n)) |>
+  filter(depressed == "More than half the days" | depressed == "Nearly every day") |>
+  summarise(prop = sum(prop)) |>
+  ggplot(aes(x = prop, y = ruc)) +
+  geom_col() +
+  theme_ipsum()
+
+# Is social grade related to depression?
+mental_health_types |>
+  count(social_grade, depressed) |>
+  group_by(social_grade) |>
+  mutate(prop = n / sum(n)) |>
+  filter(depressed == "More than half the days" | depressed == "Nearly every day") |>
+  summarise(prop = sum(prop)) |> 
+  arrange(prop)
